@@ -64,7 +64,14 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-           
+            if (self.chain.length > 0) {
+                block.previousBlockHash = self.chain[self.chain.length - 1].hash;
+            }
+            block.height = self.chain.length;
+            block.time = new Date().getTime().toString().slice(0,-3);
+            block.hash = SHA256(JSON.stringify(block)).toString();
+            this.chain.push(block);
+            this.height += 1;
         });
     }
 
@@ -78,7 +85,14 @@ class Blockchain {
      */
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
-            
+            //getnewaddress "mylabel" "legacy"
+            //mrPrghtHxE2s7Pcm6pALdTRaTjppfxX4yp
+            let Msg = address + ':' + new Date().getTime().toString().slice(0,-3) + ':starRegistry';
+            if(Msg){
+                resolve(Msg);
+            } else {
+                resolve(null);
+            }
         });
     }
 
