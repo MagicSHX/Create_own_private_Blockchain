@@ -11,6 +11,7 @@
 const SHA256 = require('crypto-js/sha256');
 const BlockClass = require('./block.js');
 const bitcoinMessage = require('bitcoinjs-message');
+const hex2ascii = require('hex2ascii');
 
 class Blockchain {
 
@@ -116,7 +117,19 @@ class Blockchain {
     submitStar(address, message, signature, star) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-            
+            let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
+            let Timestamp = parseInt(message.split(':')[1]);
+            if (currentTime <= Timestamp + 300000) {
+                if (bitcoinMessage.verify(message, address, signature)) {
+                    let block = new BlockClass.Block({data: {"owner": message.split(':')[0], "star": star}});
+                    this._addBlock(block);
+                    resolve(block);
+                } else {
+                    resolve('Singature invalid');
+                }
+            } else {
+                resolve('Singature expired, please regenerate and use it within 5 min.');
+            }
         });
     }
 
@@ -160,6 +173,22 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
+            var i;
+            var my_stars = [];
+            console.log(self.height);
+            for (i = 1; i <= parseInt(self.height); i++) {
+                console.log(i);
+                let current_block_body = self.chain[i].body;
+                console.log(current_block_body);
+                let current_block_data = JSON.parse(hex2ascii(current_block_body)).data;
+                //let current_block_data = hex2ascii('0x68656c6c6f20776f726c64');
+                console.log(current_block_data);
+                if (current_block_data.owner == address){
+                    my_stars.push(current_block_data);
+                }
+            }
+            resolve(my_stars);
+
             
         });
     }
