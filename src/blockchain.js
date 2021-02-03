@@ -140,9 +140,18 @@ class Blockchain {
      * @param {*} hash 
      */
     getBlockByHash(hash) {
+        //console.log("hash");
         let self = this;
+        
         return new Promise((resolve, reject) => {
-           
+            //console.log(hash);
+            let filtered_block = self.chain.filter(function(x){return x.hash === hash})[0];
+            //console.log(filtered_block);
+            if(filtered_block){
+                resolve(filtered_block);
+            } else {
+                resolve(null);
+            }
         });
     }
 
@@ -202,8 +211,25 @@ class Blockchain {
     validateChain() {
         let self = this;
         let errorLog = [];
+        var i;
         return new Promise(async (resolve, reject) => {
-            
+            for (i = 1; i <= parseInt(self.height); i++) {
+                console.log(i);
+                let recent_error = await self.chain[i].validate()
+                console.log(recent_error);
+                //let current_block_data = JSON.parse(hex2ascii(current_block_body)).data;
+                //let current_block_data = hex2ascii('0x68656c6c6f20776f726c64');
+                //console.log(current_block_data);
+
+                errorLog.push("Block " + i + ": " + recent_error);
+
+                if (self.chain[i].previousBlockHash == self.chain[i - 1].hash){
+                    errorLog.push("Block " + i + "'s previous block's Hash value is valid!");
+                } else {
+                    errorLog.push("Block " + i + " is broken from previous block's Hash value!");
+                }
+            }
+            resolve(errorLog);
         });
     }
 
