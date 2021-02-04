@@ -73,6 +73,7 @@ class Blockchain {
             block.hash = SHA256(JSON.stringify(block)).toString();
             this.chain.push(block);
             this.height += 1;
+            self.validateChain();
         });
     }
 
@@ -119,7 +120,7 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));
             let Timestamp = parseInt(message.split(':')[1]);
-            if (currentTime <= Timestamp + 300000) {
+            if (currentTime <= Timestamp + 300) {
                 if (bitcoinMessage.verify(message, address, signature)) {
                     let block = new BlockClass.Block({data: {"owner": message.split(':')[0], "star": star}});
                     this._addBlock(block);
@@ -214,9 +215,9 @@ class Blockchain {
         var i;
         return new Promise(async (resolve, reject) => {
             for (i = 1; i <= parseInt(self.height); i++) {
-                console.log(i);
+                //console.log(i);
                 let recent_error = await self.chain[i].validate()
-                console.log(recent_error);
+                //console.log(recent_error);
                 //let current_block_data = JSON.parse(hex2ascii(current_block_body)).data;
                 //let current_block_data = hex2ascii('0x68656c6c6f20776f726c64');
                 //console.log(current_block_data);
@@ -229,6 +230,7 @@ class Blockchain {
                     errorLog.push("Block " + i + " is broken from previous block's Hash value!");
                 }
             }
+            console.log(errorLog);
             resolve(errorLog);
         });
     }
