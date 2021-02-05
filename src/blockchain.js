@@ -123,9 +123,9 @@ class Blockchain {
             if (currentTime <= Timestamp + 300) {
                 if (bitcoinMessage.verify(message, address, signature)) {
                     let block = new BlockClass.Block({data: {"owner": message.split(':')[0], "star": star}});
-                    console.log('123');
+                    //console.log('123');
                     let chain_error_log = await self._addBlock(block);
-                    console.log(chain_error_log.length);
+                    //console.log(chain_error_log.length);
                     if (chain_error_log.length == 0) {
                         resolve(block);
                     }else{
