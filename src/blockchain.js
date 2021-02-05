@@ -73,7 +73,7 @@ class Blockchain {
             block.hash = SHA256(JSON.stringify(block)).toString();
             this.chain.push(block);
             this.height += 1;
-            self.validateChain();
+            resolve(self.validateChain());
         });
     }
 
@@ -123,8 +123,15 @@ class Blockchain {
             if (currentTime <= Timestamp + 300) {
                 if (bitcoinMessage.verify(message, address, signature)) {
                     let block = new BlockClass.Block({data: {"owner": message.split(':')[0], "star": star}});
-                    this._addBlock(block);
-                    resolve(block);
+                    console.log('123');
+                    let chain_error_log = await self._addBlock(block);
+                    console.log(chain_error_log.length);
+                    if (chain_error_log.length == 0) {
+                        resolve(block);
+                    }else{
+                        resolve(chain_error_log);
+                    }
+                    
                 } else {
                     resolve('Singature invalid');
                 }
@@ -221,15 +228,17 @@ class Blockchain {
                 //let current_block_data = JSON.parse(hex2ascii(current_block_body)).data;
                 //let current_block_data = hex2ascii('0x68656c6c6f20776f726c64');
                 //console.log(current_block_data);
-
-                errorLog.push("Block " + i + ": " + recent_error);
-
+                if (recent_error != "Block is valid") {
+                    errorLog.push("Block " + i + ": " + recent_error);
+                }
+                
                 if (self.chain[i].previousBlockHash == self.chain[i - 1].hash){
-                    errorLog.push("Block " + i + "'s previous block's Hash value is valid!");
+                    //errorLog.push("Block " + i + "'s previous block's Hash value is valid!");
                 } else {
                     errorLog.push("Block " + i + " is broken from previous block's Hash value!");
                 }
             }
+            console.log('abc');
             console.log(errorLog);
             resolve(errorLog);
         });
